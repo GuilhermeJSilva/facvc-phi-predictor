@@ -53,13 +53,52 @@ up201603647@fe.up.pt}
 
 \maketitle
 
+The problem is a simplification of the biggest problem in Adaptive Optics.
+This term comes from technology used in optical systems to recover angular
+resolution, often called image quality. Which is lost when the observations
+are made through turbulent mediums.
+
+The solution to it lies in estimating the optical wave-fronts from measurements
+and the applying its inverse to a collection of sophisticated deformable
+mirrors in real time.
+
+In this project, I aim to tackle only a simplification of the problem. Which
+consists of a telescope with only four mirrors spaced in accordance with Fig.
+\ref{diagram}. The data necessary is going to be simulated using the algorithm 
+below:
+
+
 \begin{enumerate}
-    \item Explain the basic problem of the wave-front reconstruction
-    \item Explain the simplification of the problem
-    \item Explain the data generation
-    \item Explain simplifications that can be made: fixing some degrees of freedom
-    \item Vague idea of how to tackle the problem: NN, CNN and feature extraction with SVM
+    \item Randomize the position of each of the mirrors (piston, tip and tilt);
+    \item Calculate the phase map for each of the mirrors;
+    \item Compose the matrix of the telescope with the phases of the 4 mirrors;
+    \item Calculate the electric field in each point of the telescope
+          \ref{electric-field} where $\phi$ is the phase at the point and 
+          $A$ is a constant;
+    \item Calculate the measurement of the telescope's sensor using \ref{sensor},
+          where $\hat{E}$ corresponds to a fourier transform of $E$.
 \end{enumerate}
 
+\begin{figure}[htbp]
+    \centering
+    
+    \includegraphics{telescope_diagram.png}
+    \caption{Diagram of the telescope: (M): deformable mirrors, (T): telescope
+    lens}
+    \label{diagram}
+\end{figure}
 
+\begin{equation}\label{electric-field}
+    E =  Ae^{(\imath \phi)}
+\end{equation}
+
+\begin{equation}\label{sensor}
+    s = |\hat{ E }|^2
+\end{equation}
+
+After the data is generated, I aim to tackle the regressions problem of
+determining the original position of the mirrors from the estimated sensor
+measurements. For this I will explore deep learning algorithms such as
+Convolutional Neural Networks and try to do some feature extraction to
+apply more traditional methods such as Support Vector Machines.
 \end{document}
