@@ -1,8 +1,19 @@
 import numpy as np
-from typing import Tuple, List
+from typing import Tuple, List, Generator
 
 
-def randomNormal(params: Tuple[float, float]):
+def randomNormal(params: Tuple[float, float]) ->  Generator[float, None, None]: 
+    """Generator which returns random variables in
+    a normal distribution
+
+    Args:
+        params (Tuple[float, float]): Tuple consisting of
+            min and variance
+
+    Yields:
+        Generator[float, None, None]: Generator for a random
+            variable in a normal distribution
+    """
     mean, var = params
     while True:
         yield np.random.normal(mean, var)
