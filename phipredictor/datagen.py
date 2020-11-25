@@ -20,6 +20,9 @@ def randomNormal(params: Tuple[float, float]) -> Generator[float, None, None]:
         yield np.random.normal(mean, var)
 
 
+toComplex = np.vectorize(lambda phi: np.complex(0, phi))
+
+
 class PhiGen(object):
     """
     Generates measurements based on random mirror poses.
@@ -105,8 +108,8 @@ class PhiGen(object):
             x_offset = x + start_x
             for y in range(self.mirror_size_h):
                 y_offset = y + start_y
-                real_x = x - self.mirror_size_w/2
-                real_y = x - self.mirror_size_h/2
+                real_x = ((x / self.mirror_size_w) - 0.5)
+                real_y = ((y / self.mirror_size_h) - 0.5)
                 measurement[x_offset, y_offset] = (
                     piston - x_multiplier * real_x + y_multiplier*real_y)/denominator
 
@@ -126,7 +129,6 @@ class PhiGen(object):
         piston, tip, tilt = self._getRandomPose()
         self._applyMirror(measuremt, starting_pos, piston, tip, tilt)
         return np.array([piston, tip, tilt])
-
 
     def _addMirrors(self, measurement: np.ndarray) -> np.array:
         """Adds mirror phases to the measurement
@@ -156,6 +158,7 @@ class PhiGen(object):
         """
         measurement = np.zeros((self.out_size, self.out_size))
         mirror_poses = self._addMirrors(measurement)
-
-
+        measurement = toComplex(measurement)
+        measurement = np.exp(measurement)
+        measurement = np.abs(np.fft.fft2(measurement))**2
         return measurement, mirror_poses
