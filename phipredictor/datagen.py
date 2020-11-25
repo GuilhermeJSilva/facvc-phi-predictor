@@ -2,7 +2,7 @@ import numpy as np
 from typing import Tuple, List, Generator
 
 
-def randomNormal(params: Tuple[float, float]) ->  Generator[float, None, None]: 
+def randomNormal(params: Tuple[float, float]) -> Generator[float, None, None]:
     """Generator which returns random variables in
     a normal distribution
 
@@ -79,6 +79,19 @@ class PhiGen(object):
         """
         return next(self.piston_gen), next(self.tip_gen), next(self.tilt_gen)
 
+    def _applyMirror(self,
+                     measurement: np.ndarray,
+                     starting_pos: Tuple[int, int],
+                     piston: float,
+                     tip: float,
+                     tilt: float) -> None:
+        start_x, start_y = starting_pos
+        for x in range(self.mirror_size_w):
+            x_offset = x + start_x
+            for y in range(self.mirror_size_h):
+                y_offset = y + start_y
+                measurement[x_offset, y_offset] = 1
+
     def _addMirror(self, measuremt: np.ndarray, starting_pos: Tuple[int, int] = (0, 0)) -> np.array:
         """Adds the phase of the mirror to the measurement
 
@@ -93,7 +106,7 @@ class PhiGen(object):
             is randomly generated
         """
         piston, tip, tilt = self._getRandomPose()
-
+        self._applyMirror(measuremt, starting_pos, piston, tip, tilt)
         return np.array([piston, tip, tilt])
 
     def generateSample(self) -> Tuple[np.ndarray, np.array]:
@@ -106,7 +119,7 @@ class PhiGen(object):
                 element is an array with the poses of the 4 mirrors in order,
                 i.e. [pose1, tip1, tilt1, pose2, tip2, tilt2,...]
         """
-        measurement = np.ndarray((self.out_size, self.out_size))
+        measurement = np.zeros((self.out_size, self.out_size))
 
         mirror_poses = np.array([])
         for start_x, start_y in self.mirror_pos:
