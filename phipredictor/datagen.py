@@ -86,6 +86,17 @@ class PhiGen(object):
                      piston: float,
                      tip: float,
                      tilt: float) -> None:
+        """Changes values of measurement according
+        to the pose of one mirror
+
+        Args:
+            measurement (np.ndarray): Measurement to change
+            starting_pos (Tuple[int, int]): Starting position of
+                the mirror
+            piston (float): mirror pose (piston)
+            tip (float): mirror pose (tip)
+            tilt (float): mirror pose (tilt)
+        """
         start_x, start_y = starting_pos
         x_multiplier = math.sin(tip) * math.cos(tilt)
         y_multiplier = math.sin(tilt)
@@ -116,6 +127,23 @@ class PhiGen(object):
         self._applyMirror(measuremt, starting_pos, piston, tip, tilt)
         return np.array([piston, tip, tilt])
 
+
+    def _addMirrors(self, measurement: np.ndarray) -> np.array:
+        """Adds mirror phases to the measurement
+
+        Args:
+            measurement (np.ndarray): Measurement to be
+                changed
+
+        Returns:
+            np.array: array of mirror poses in order
+        """
+        mirror_poses = np.array([])
+        for start_x, start_y in self.mirror_pos:
+            mirror_poses = np.append(mirror_poses,
+                                     self._addMirror(measurement, starting_pos=(start_x, start_y)))
+        return mirror_poses
+
     def generateSample(self) -> Tuple[np.ndarray, np.array]:
         """Generates a single sample from a random mirror pose
 
@@ -127,10 +155,7 @@ class PhiGen(object):
                 i.e. [pose1, tip1, tilt1, pose2, tip2, tilt2,...]
         """
         measurement = np.zeros((self.out_size, self.out_size))
+        mirror_poses = self._addMirrors(measurement)
 
-        mirror_poses = np.array([])
-        for start_x, start_y in self.mirror_pos:
-            mirror_poses = np.append(mirror_poses,
-                                     self._addMirror(measurement, starting_pos=(start_x, start_y)))
 
         return measurement, mirror_poses
