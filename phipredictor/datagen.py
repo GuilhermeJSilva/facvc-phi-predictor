@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from typing import Tuple, List, Generator
 
@@ -86,11 +87,17 @@ class PhiGen(object):
                      tip: float,
                      tilt: float) -> None:
         start_x, start_y = starting_pos
+        x_multiplier = math.sin(tip) * math.cos(tilt)
+        y_multiplier = math.sin(tilt)
+        denominator = math.cos(tip) * math.cos(tilt)
         for x in range(self.mirror_size_w):
             x_offset = x + start_x
             for y in range(self.mirror_size_h):
                 y_offset = y + start_y
-                measurement[x_offset, y_offset] = 1
+                real_x = x - self.mirror_size_w/2
+                real_y = x - self.mirror_size_h/2
+                measurement[x_offset, y_offset] = (
+                    piston - x_multiplier * real_x + y_multiplier*real_y)/denominator
 
     def _addMirror(self, measuremt: np.ndarray, starting_pos: Tuple[int, int] = (0, 0)) -> np.array:
         """Adds the phase of the mirror to the measurement
