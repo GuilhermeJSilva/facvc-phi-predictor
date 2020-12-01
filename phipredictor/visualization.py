@@ -9,6 +9,6 @@ def visualizeMatrix(matrix, filename):
     fig.colorbar(cax)
     fig.savefig(filename)
 
-gen = phipredictor.datagen.PhiGen()
-measurement, poses = gen.generateSample()
-visualizeMatrix(np.log(measurement), "test.png")
+gen = phipredictor.datagen.SampleGen()
+measurement, poses = gen.genSample()
+visualizeMatrix(measurement, "test.png")
