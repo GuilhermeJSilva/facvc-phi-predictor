@@ -19,7 +19,7 @@ def insertMatrix(target: np.ndarray, x_start: int, y_start: int, origin: np.ndar
 
 class SampleGen:
 
-    def __init__(self, size_segment=128, crop_size=100):
+    def __init__(self, size_segment=128, crop_size=200):
         self.wvl = 850e-9
         self.size_segment = size_segment
         self.size_surface = 4*self.size_segment
@@ -87,7 +87,7 @@ class SampleGen:
         half = int(size / 2)
         return matrix[center - half: center + half, center - half: center + half]
 
-    def genSample(self):
+    def genSample(self) -> Tuple[np.ndarray, np.ndarray]:
         sample = np.zeros((self.size_surface, self.size_surface))
         mirror_poses = self._addSegments(sample)
         sample = self._electricFieldPupil(sample)
@@ -96,3 +96,15 @@ class SampleGen:
         sample = self._cropCenter(sample, self.crop_size)
 
         return sample, mirror_poses
+
+    def genSamples(self, n: int) -> Tuple[np.ndarray, np.ndarray]:
+        sample, mirror_poses = self.genSample()
+        samples = np.expand_dims(sample, 0)
+        mirrors = np.expand_dims(mirror_poses, 0)
+
+        for _ in range(n - 1):
+            sample, mirror_poses = self.genSample()
+            samples = np.append(samples, np.expand_dims(sample, 0), axis=0)
+            mirrors = np.append(mirrors, np.expand_dims(mirror_poses, 0), axis=0)
+
+        return samples, mirrors
