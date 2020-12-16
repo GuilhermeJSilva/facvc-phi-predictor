@@ -5,5 +5,6 @@ setup(
     packages=find_packages(),
     install_requires=[
         "numpy",
-        "torch"
+        "torch",
+        "matplotlib"
     ])
