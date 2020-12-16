@@ -99,12 +99,12 @@ class SampleGen:
 
     def genSamples(self, n: int) -> Tuple[np.ndarray, np.ndarray]:
         sample, mirror_poses = self.genSample()
-        samples = np.expand_dims(sample, 0)
-        mirrors = np.expand_dims(mirror_poses, 0)
+        samples = []
+        mirrors = []
 
-        for _ in range(n - 1):
+        for _ in range(n):
             sample, mirror_poses = self.genSample()
-            samples = np.append(samples, np.expand_dims(sample, 0), axis=0)
-            mirrors = np.append(mirrors, np.expand_dims(mirror_poses, 0), axis=0)
+            samples.append(sample)
+            mirrors.append(mirror_poses)
 
-        return samples, mirrors
+        return np.stack(samples), np.stack(mirrors)
