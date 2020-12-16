@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import phipredictor.datagen
+import phipredictor.simulation
+import phipredictor.random_sampler
 
 def visualizeMatrix(matrix, filename):
     fig = plt.figure(figsize=(12,10))
@@ -10,6 +11,7 @@ def visualizeMatrix(matrix, filename):
     fig.savefig(filename)
 
 if __name__ == "__main__":
-    gen = phipredictor.datagen.SampleGen()
-    measurement, poses = gen.genSample()
-    visualizeMatrix(measurement, "test.png")
+    sim = phipredictor.simulation.PhaseSimulator()
+    gen = phipredictor.random_sampler.RandomSampler(sim)
+    measurement, poses = gen.genSamples(1)
+    visualizeMatrix(measurement[0], "test.png")
