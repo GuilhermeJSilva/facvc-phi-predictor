@@ -17,7 +17,7 @@ def insertMatrix(target: np.ndarray, x_start: int, y_start: int, origin: np.ndar
     target[x_start:x_start + size_x, y_start:y_start + size_y] = origin
 
 
-class SampleGen:
+class PhaseSimulator:
 
     def __init__(self, size_segment=128, crop_size=200):
         self.wvl = 850e-9
@@ -35,8 +35,7 @@ class SampleGen:
         self.mirror_positions = self._genMirrorPositions()
         self.amplitude = self._amplitude()
 
-    def _addSegments(self, sample: np.ndarray) -> np.ndarray:
-        mirror_poses = np.random.normal(size=(4, 3)) / 10
+    def _addSegments(self, sample: np.ndarray, mirror_poses: np.ndarray) -> np.ndarray:
         for i, (x_start, y_start) in enumerate(self.mirror_positions):
             phase_microns = self.modes @ mirror_poses[i].T
             phase_microns = np.reshape(
@@ -87,24 +86,12 @@ class SampleGen:
         half = int(size / 2)
         return matrix[center - half: center + half, center - half: center + half]
 
-    def genSample(self) -> Tuple[np.ndarray, np.ndarray]:
+    def simulate(self, mirror_pose: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         sample = np.zeros((self.size_surface, self.size_surface))
-        mirror_poses = self._addSegments(sample)
+        mirror_poses = self._addSegments(sample, mirror_pose)
         sample = self._electricFieldPupil(sample)
         sample = self._electricFieldFocal(sample)
         sample = np.square(np.abs(sample))
         sample = self._cropCenter(sample, self.crop_size)
 
         return sample, mirror_poses
-
-    def genSamples(self, n: int) -> Tuple[np.ndarray, np.ndarray]:
-        sample, mirror_poses = self.genSample()
-        samples = []
-        mirrors = []
-
-        for _ in range(n):
-            sample, mirror_poses = self.genSample()
-            samples.append(sample)
-            mirrors.append(mirror_poses)
-
-        return np.stack(samples), np.stack(mirrors)
