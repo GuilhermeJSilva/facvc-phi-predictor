@@ -87,6 +87,7 @@ class PhaseSimulator:
         return matrix[center - half: center + half, center - half: center + half]
 
     def simulate(self, mirror_pose: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        assert mirror_pose.shape == (4, 3)
         sample = np.zeros((self.size_surface, self.size_surface))
         mirror_poses = self._addSegments(sample, mirror_pose)
         sample = self._electricFieldPupil(sample)
