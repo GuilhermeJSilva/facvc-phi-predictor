@@ -31,4 +31,4 @@ class RandomSampler:
 if __name__ == "__main__":
     simulator = PhaseSimulator()
     sampler = RandomSampler(simulator)
-    sampler.genToFiles("data/set_2", 500)
+    sampler.genToFiles("data/set_1", 500)

@@ -4,9 +4,9 @@ import numpy as np
 import os
 
 
-class MemoryEfficientDataset(torch.utils.data.Dataset):
-    def __init__(self, root_path: str):
-        self.sample_frame = pd.read_csv(root_path + "/data.csv")
+class PhaseDataset(torch.utils.data.Dataset):
+    def __init__(self, root_path: str, csv_path: str):
+        self.sample_frame = pd.read_csv(csv_path)
         self.root_path = root_path
 
 
@@ -29,7 +29,7 @@ class MemoryEfficientDataset(torch.utils.data.Dataset):
 
 
 if __name__ == "__main__":
-    dataset = MemoryEfficientDataset("data/set_1")
+    dataset = PhaseDataset("data/set_2/samples", "data/set_2/data.csv")
     for i in range(len(dataset)):
         sample = dataset[i]
         print(i, sample['image'].shape, sample['poses'].shape)
