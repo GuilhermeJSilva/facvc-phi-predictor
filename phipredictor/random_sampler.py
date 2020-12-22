@@ -14,13 +14,16 @@ class RandomSampler:
             for part in ["piston", "tilt", "tip"]
         ]
 
+    def genSample(self):
+        random_sample = np.random.normal(size=(4, 3)) / 10
+        return self.simulator.simulate(random_sample), random_sample
+
     def genToFiles(self, folder_path: str, n: int):
         os.makedirs(folder_path, exist_ok=True)
         os.makedirs(folder_path + "/samples")
         df = pd.DataFrame(columns=self.columns)
         for i in range(n):
-            random_sample = np.random.normal(size=(4, 3)) / 10
-            samples, poses = self.simulator.simulate(random_sample)
+            samples, poses = self.genSample()
             filename = str(i) + ".npy"
             np.save(folder_path + "/samples/" + filename, samples)
             l_poses = [filename] + list(poses.flatten())

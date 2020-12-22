@@ -13,5 +13,5 @@ def visualizeMatrix(matrix, filename):
 if __name__ == "__main__":
     sim = phipredictor.simulation.PhaseSimulator()
     gen = phipredictor.random_sampler.RandomSampler(sim)
-    measurement, poses = gen.genSamples(1)
-    visualizeMatrix(measurement[0], "test.png")
+    measurement, poses = gen.genSample()
+    visualizeMatrix(measurement, "test.png")

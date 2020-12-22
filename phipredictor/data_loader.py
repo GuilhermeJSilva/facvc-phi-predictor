@@ -9,27 +9,25 @@ class PhaseDataset(torch.utils.data.Dataset):
         self.sample_frame = pd.read_csv(csv_path)
         self.root_path = root_path
 
-
     def __len__(self):
         return len(self.sample_frame)
 
-    
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_name = os.path.join(self.root_path,
-                                self.sample_frame["filename"][idx])
-        image = np.load(img_name)
+        img_name = os.path.join(self.root_path, self.sample_frame["filename"][idx])
+        image = torch.log(
+            torch.from_numpy(np.expand_dims(np.load(img_name), 0))
+        ).double()
         poses = self.sample_frame.iloc[idx, 2:]
-        poses = np.array([poses]).squeeze(axis=0)
-        sample = {'image': image, 'poses': poses}
+        poses = torch.tensor([poses]).squeeze(axis=0).double()
 
-        return sample
+        return image, poses
 
 
 if __name__ == "__main__":
     dataset = PhaseDataset("data/set_2/samples", "data/set_2/data.csv")
     for i in range(len(dataset)):
-        sample = dataset[i]
-        print(i, sample['image'].shape, sample['poses'].shape)
+        image, poses = dataset[i]
+        print(i, image.shape, poses.shape)

@@ -41,7 +41,6 @@ class PhaseSimulator:
             phase_microns = np.reshape(
                 phase_microns, (self.size_segment, self.size_segment))
             insertMatrix(sample, x_start, y_start, phase_microns)
-        return mirror_poses
 
     def _genMirrorPositions(self) -> List[Tuple[int, int]]:
         """Calculates the position of the right upper corner
@@ -89,10 +88,10 @@ class PhaseSimulator:
     def simulate(self, mirror_pose: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         assert mirror_pose.shape == (4, 3)
         sample = np.zeros((self.size_surface, self.size_surface))
-        mirror_poses = self._addSegments(sample, mirror_pose)
+        self._addSegments(sample, mirror_pose)
         sample = self._electricFieldPupil(sample)
         sample = self._electricFieldFocal(sample)
         sample = np.square(np.abs(sample))
         sample = self._cropCenter(sample, self.crop_size)
 
-        return sample, mirror_poses
+        return sample
