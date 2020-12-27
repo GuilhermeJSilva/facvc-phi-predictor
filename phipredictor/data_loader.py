@@ -17,9 +17,9 @@ class PhaseDataset(torch.utils.data.Dataset):
             idx = idx.tolist()
 
         img_name = os.path.join(self.root_path, self.sample_frame["filename"][idx])
-        image = torch.log(
-            torch.from_numpy(np.expand_dims(np.load(img_name), 0))
-        ).double()
+        image = np.expand_dims(np.load(img_name), 0)
+        image = np.log(image, where=image != 0)
+        image = torch.from_numpy(image).double()
         poses = self.sample_frame.iloc[idx, 2:]
         poses = torch.tensor([poses]).squeeze(axis=0).double()
 

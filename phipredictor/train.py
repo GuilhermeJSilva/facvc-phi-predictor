@@ -1,45 +1,50 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 from phipredictor.data_loader import PhaseDataset
 from phipredictor.model import Net
+import matplotlib.pyplot as plt
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-train_dataset = PhaseDataset("data/set_1/samples", "data/set_1/data.csv")
-train_loader = torch.utils.data.DataLoader(
-    train_dataset, batch_size=4, shuffle=False, num_workers=2
-)
-
-model = Net().double()
-
-criterion = nn.MSELoss()
-optimizer = optim.SGD(model.parameters(), lr=1e-12)
 
 
-model.train()
+def fit(
+    model: nn.Module,
+    optimizer: optim.Optimizer,
+    criterion: nn.MSELoss,
+    epochs: int,
+    train_loader: torch.utils.data.DataLoader,
+):
+    model.train()
+    for _ in range(epochs):
 
-for epoch in range(2):  # loop over the dataset multiple times
+        loss_history = []
+        for data in train_loader:
+            inputs, truth = data
 
-    running_loss = 0.0
-    for i, data in enumerate(train_loader, 0):
-        # get the inputs; data is a list of [inputs, labels]
-        inputs, truth = data
+            optimizer.zero_grad()
 
-        # zero the parameter gradients
-        optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, truth)
+            loss.backward()
+            optimizer.step()
 
-        # forward + backward + optimize
-        outputs = model(inputs)
-        loss = criterion(outputs, truth)
-        loss.backward()
-        optimizer.step()
+            loss_history.append(loss.item())
+        return loss_history
 
-        # print statistics
-        running_loss += loss.item()
-        if i % 50 == 49:  # print every 2000 mini-batches
-            print("[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
-            running_loss = 0.0
 
-print("Finished Training")
+if __name__ == "__main__":
+    train_dataset = PhaseDataset("data/set_1/samples", "data/set_1/data.csv")
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=4, shuffle=False, num_workers=2
+    )
+
+    model = Net().double()
+
+    criterion = nn.MSELoss()
+    optimizer = optim.SGD(model.parameters(), lr=1e-5)
+    running_loss = fit(model, optimizer, criterion, 2, train_loader)
+
+    plt.plot(running_loss)
+    plt.show()
