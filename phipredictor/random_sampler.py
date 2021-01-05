@@ -37,17 +37,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("output_dir", help="folder destination for the files")
     parser.add_argument(
-        "-n", help="number of examples to generate", dest="n", default=500
+        "-n", help="number of examples to generate", dest="n", default=500, type=int
     )
     parser.add_argument(
         "-p",
         help="apply poisson noise to the generated samples",
         dest="noise",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         default=False,
     )
 
     args = parser.parse_args()
     simulator = PhaseSimulator()
     sampler = RandomSampler(simulator)
+    print(args.noise)
     sampler.genToFiles(args.output_dir, args.n, args.noise)

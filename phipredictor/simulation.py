@@ -93,8 +93,8 @@ class PhaseSimulator:
         sample = self._electricFieldFocal(sample)
         sample = np.square(np.abs(sample))
         if noise:
-            random_poisson = np.random.poisson(sample)
-            sample += random_poisson
+            sample = np.random.poisson(sample)
+            # sample += random_poisson
         sample = self._cropCenter(sample, self.crop_size)
 
         return sample
