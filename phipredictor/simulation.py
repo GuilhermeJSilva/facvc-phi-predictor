@@ -85,13 +85,16 @@ class PhaseSimulator:
         half = int(size / 2)
         return matrix[center - half: center + half, center - half: center + half]
 
-    def simulate(self, mirror_pose: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def simulate(self, mirror_pose: np.ndarray, noise: bool) -> Tuple[np.ndarray, np.ndarray]:
         assert mirror_pose.shape == (4, 3)
         sample = np.zeros((self.size_surface, self.size_surface))
         self._addSegments(sample, mirror_pose)
         sample = self._electricFieldPupil(sample)
         sample = self._electricFieldFocal(sample)
         sample = np.square(np.abs(sample))
+        if noise:
+            random_poisson = np.random.poisson(sample)
+            sample += random_poisson
         sample = self._cropCenter(sample, self.crop_size)
 
         return sample

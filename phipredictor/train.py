@@ -12,6 +12,7 @@ device = "cuda:0" if torch.cuda.is_available() else "cpu"
 def validate(
     model: nn.Module, val_loader: torch.utils.data.DataLoader, criteria: nn.MSELoss
 ):
+    model.eval()
     losses = []
     for inputs, truth in val_loader:
         outputs = model(inputs)
@@ -33,6 +34,7 @@ def fit(
     loss_history = []
     val_loss_history = [validate(model, val_loader, criteria)]
     for _ in range(epochs):
+        model.train()
 
         for data in train_loader:
             inputs, truth = data

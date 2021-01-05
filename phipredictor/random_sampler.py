@@ -14,16 +14,16 @@ class RandomSampler:
             for part in ["piston", "tilt", "tip"]
         ]
 
-    def genSample(self):
+    def genSample(self, noise: bool):
         random_sample = np.random.normal(size=(4, 3)) / 10
-        return self.simulator.simulate(random_sample), random_sample
+        return self.simulator.simulate(random_sample, noise), random_sample
 
-    def genToFiles(self, folder_path: str, n: int):
+    def genToFiles(self, folder_path: str, n: int, noise: bool = False):
         os.makedirs(folder_path, exist_ok=True)
         os.makedirs(folder_path + "/samples")
         df = pd.DataFrame(columns=self.columns)
         for i in range(n):
-            samples, poses = self.genSample()
+            samples, poses = self.genSample(noise)
             filename = str(i) + ".npy"
             np.save(folder_path + "/samples/" + filename, samples)
             l_poses = [filename] + list(poses.flatten())
@@ -32,6 +32,22 @@ class RandomSampler:
 
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("output_dir", help="folder destination for the files")
+    parser.add_argument(
+        "-n", help="number of examples to generate", dest="n", default=500
+    )
+    parser.add_argument(
+        "-p",
+        help="apply poisson noise to the generated samples",
+        dest="noise",
+        action="store_true",
+        default=False,
+    )
+
+    args = parser.parse_args()
     simulator = PhaseSimulator()
     sampler = RandomSampler(simulator)
-    sampler.genToFiles("data/set_1", 500)
+    sampler.genToFiles(args.output_dir, args.n, args.noise)
