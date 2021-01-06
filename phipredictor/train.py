@@ -69,8 +69,12 @@ if __name__ == "__main__":
     criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=1e-5)
     epochs = 10
-    loss_hist, val_loss_hist = fit(model, optimizer, criterion, epochs, train_loader, val_loader)
+    loss_hist, val_loss_hist = fit(
+        model, optimizer, criterion, epochs, train_loader, val_loader
+    )
 
     plt.plot(loss_hist)
-    plt.plot([i * len(train_dataset) / batch_size for i in range(epochs + 1)], val_loss_hist)
+    plt.plot(
+        [i * len(train_dataset) / batch_size for i in range(epochs + 1)], val_loss_hist
+    )
     plt.show()

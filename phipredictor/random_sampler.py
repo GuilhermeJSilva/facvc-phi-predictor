@@ -18,7 +18,7 @@ class RandomSampler:
         random_sample = np.random.normal(size=(4, 3)) / 10
         return self.simulator.simulate(random_sample, noise, symmetry), random_sample
 
-    def genToFiles(self, folder_path: str, n: int, noise: bool, symmetry:bool):
+    def genToFiles(self, folder_path: str, n: int, noise: bool, symmetry: bool):
         os.makedirs(folder_path, exist_ok=True)
         os.makedirs(folder_path + "/samples")
         df = pd.DataFrame(columns=self.columns)
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         help="Exclude symmetry in the generation",
         dest="symmetry",
         action=argparse.BooleanOptionalAction,
-        default=False
+        default=False,
     )
 
     args = parser.parse_args()

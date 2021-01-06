@@ -18,4 +18,4 @@ if __name__ == "__main__":
     parser.add_argument("out_file", nargs="?", default="output.png")
     args = parser.parse_args()
     data = np.load(args.in_file)
-    visualizeMatrix(data, args.out_file) 
+    visualizeMatrix(data, args.out_file)
