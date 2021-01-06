@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import phipredictor.simulation
-import phipredictor.random_sampler
 
 
 def visualizeMatrix(matrix, filename):
