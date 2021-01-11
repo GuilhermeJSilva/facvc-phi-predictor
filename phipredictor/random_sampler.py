@@ -15,7 +15,7 @@ class RandomSampler:
         ]
 
     def genSample(self, noise: bool, symmetry: bool):
-        random_sample = np.random.normal(size=(4, 3)) / 10
+        random_sample = np.random.normal(size=(3, 4)) / 10
         return self.simulator.simulate(random_sample, noise, symmetry), random_sample
 
     def genToFiles(self, folder_path: str, n: int, noise: bool, symmetry: bool):

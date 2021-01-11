@@ -8,9 +8,9 @@ def toVector(matrix: np.ndarray):
 
 
 def normalizeTilt(size_segment: int):
-    linspace = np.expand_dims(np.linspace(-1, 1, num=size_segment), 1)
-    tilt = linspace @ np.ones((1, size_segment))
-    return tilt / np.sqrt(np.sum(np.square(tilt)) / size_segment ** 2)
+    linspace = np.expand_dims(np.linspace(-1, 1, num=size_segment), 0)
+    tilt = linspace.T @ np.ones((1, size_segment))
+    return tilt / np.sqrt(np.sum(np.square(tilt)) / (size_segment ** 2))
 
 
 def insertMatrix(target: np.ndarray, x_start: int, y_start: int, origin: np.ndarray):
@@ -28,9 +28,9 @@ class PhaseSimulator:
 
         self.piston = np.ones((self.size_segment, self.size_segment))
         self.tilt = normalizeTilt(self.size_segment)
-        self.tip = self.tilt.T
+        self.tip = np.transpose(self.tilt)
         self.modes = np.array(
-            [toVector(self.piston), toVector(self.tilt), toVector(self.tip)]
+            [toVector(self.piston), toVector(self.tip), toVector(self.tilt)]
         ).T
 
         self.mirror_positions = self._genMirrorPositions()
@@ -38,7 +38,7 @@ class PhaseSimulator:
 
     def _addSegments(self, sample: np.ndarray, mirror_poses: np.ndarray) -> np.ndarray:
         for i, (x_start, y_start) in enumerate(self.mirror_positions):
-            phase_microns = self.modes @ mirror_poses[i].T
+            phase_microns = np.matmul(self.modes, mirror_poses[:, i])
             phase_microns = np.reshape(
                 phase_microns, (self.size_segment, self.size_segment)
             )
@@ -106,11 +106,17 @@ class PhaseSimulator:
         ] = 0
 
     def simulate(
-        self, mirror_pose: np.ndarray, noise: bool, symmetry: bool
+        self,
+        mirror_pose: np.ndarray,
+        noise: bool,
+        symmetry: bool,
+        save_step: str = None,
     ) -> Tuple[np.ndarray, np.ndarray]:
-        assert mirror_pose.shape == (4, 3)
+        assert mirror_pose.shape == (3, 4)
         sample = np.zeros((self.size_surface, self.size_surface))
         self._addSegments(sample, mirror_pose)
+        if save_step is not None:
+            vis.visualizeMatrix(sample, save_step)
         if not symmetry:
             self._removeSymmetry(sample)
         sample = self._electricFieldPupil(sample)
@@ -118,7 +124,18 @@ class PhaseSimulator:
         sample = np.square(np.abs(sample))
         if noise:
             sample = np.random.poisson(sample)
-            # sample += random_poisson
         sample = self._cropCenter(sample, self.crop_size)
 
         return sample
+
+
+if __name__ == "__main__":
+    # coef = np.array([[0, 0, 0, 0], [1, 0, -1, 0], [0, -1, 0, 1]]) / 10
+    coef = np.array([[0, 0, 0, 0], [0, 1, 0, -1], [1, 0, -1, 0]]) / 10
+    simulator = PhaseSimulator()
+    sample = simulator.simulate(coef, False, True, "middle1.png")
+    vis.visualizeMatrix(sample, "end1.png")
+    sample2 = simulator.simulate(-coef, False, True, "middle2.png")
+    vis.visualizeMatrix(sample2, "end2.png")
+    print(np.max(sample))
+    print(np.max(sample2 - sample))
