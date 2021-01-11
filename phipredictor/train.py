@@ -1,9 +1,12 @@
+import os
+import json
+import math
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 import numpy as np
-from phipredictor.data_loader import PhaseDataset
+from phipredictor.data_loader import PhaseDataset, splitKFold
 from phipredictor.model import Net
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -52,29 +55,59 @@ def fit(
     return loss_history, val_loss_history
 
 
+def saveParameters(filename, parameters):
+    with open(filename, "w") as f:
+        json.dump(parameters, f)
+
+
+def saveResults(filename, loss_hist, val_loss_hist, len_trainset, batch):
+    with open(filename, "w") as f:
+        f.write("Steps,Value,Validation\n")
+        for i, v in enumerate(loss_hist):
+            f.write(f"{i},{v},0\n")
+            if i % 100 == 99:
+                f.flush()
+        for i, v in enumerate(val_loss_hist):
+            f.write(f"{i * math.ceil(len_trainset / batch)},{v},1\n")
+            if i % 100 == 99:
+                f.flush()
+
+
+def experiment(options):
+    dataset = PhaseDataset(options.dataset + "/samples", options.dataset + "/data.csv")
+    for i, (train_set, val_set) in enumerate(splitKFold(dataset, 4, shuffle=False)):
+        os.makedirs(options.prefix, exist_ok=True)
+        train_loader = torch.utils.data.DataLoader(train_set, batch_size=options.batch)
+        val_loader = torch.utils.data.DataLoader(val_set, batch_size=options.batch)
+        model = Net().double()
+        criterion = nn.MSELoss()
+        optimizer = optim.SGD(model.parameters(), lr=options.lr)
+        loss_hist, val_loss_hist = fit(
+            model, optimizer, criterion, options.epochs, train_loader, val_loader
+        )
+        saveParameters(os.path.join(options.prefix, "parameters.json"), vars(options))
+        saveResults(
+            os.path.join(options.prefix, f"mean_error_f{i + 1}.csv"),
+            loss_hist,
+            val_loss_hist,
+            len(train_set),
+            options.batch,
+        )
+        torch.save(model, os.path.join(options.prefix, f"model_f{i+1}.pth"))
+
+
+
 if __name__ == "__main__":
-    batch_size = 4
-    train_dataset = PhaseDataset("data/set_1/samples", "data/set_1/data.csv")
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=False, num_workers=2
-    )
+    import argparse
 
-    val_dataset = PhaseDataset("data/set_2/samples", "data/set_2/data.csv")
-    val_loader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=batch_size, shuffle=False, num_workers=2
+    parser = argparse.ArgumentParser()
+    parser.add_argument("dataset", type=str, help="dataset to use")
+    parser.add_argument("prefix", type=str, help="prefix to save the data")
+    parser.add_argument(
+        "-lr", type=float, dest="lr", help="learning rate", default=1e-5
     )
+    parser.add_argument("-batch", type=int, dest="batch", help="batch size", default=4)
+    parser.add_argument("-epochs", type=int, default=10, dest="epochs")
+    args = parser.parse_args()
 
-    model = Net().double()
-
-    criterion = nn.MSELoss()
-    optimizer = optim.SGD(model.parameters(), lr=1e-5)
-    epochs = 10
-    loss_hist, val_loss_hist = fit(
-        model, optimizer, criterion, epochs, train_loader, val_loader
-    )
-
-    plt.plot(loss_hist)
-    plt.plot(
-        [i * len(train_dataset) / batch_size for i in range(epochs + 1)], val_loss_hist
-    )
-    plt.show()
+    experiment(args)

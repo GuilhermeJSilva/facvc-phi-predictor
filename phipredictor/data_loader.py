@@ -18,7 +18,8 @@ class PhaseDataset(torch.utils.data.Dataset):
 
         img_name = os.path.join(self.root_path, self.sample_frame["filename"][idx])
         image = np.expand_dims(np.load(img_name), 0)
-        image = np.log(image, where=image != 0)
+        image = np.log(image, where=image > 1e-10)
+        image = np.nan_to_num(image)
         image = torch.from_numpy(image).double()
         poses = self.sample_frame.iloc[idx, 2:]
         poses = torch.tensor([poses]).squeeze(axis=0).double()
@@ -26,8 +27,36 @@ class PhaseDataset(torch.utils.data.Dataset):
         return image, poses
 
 
+class FoldDataset(object):
+    def __init__(self, original_dataset: torch.utils.data.Dataset, indices: np.array):
+        self.original = original_dataset
+        self.indices = indices
+
+    def __len__(self):
+        return len(self.indices)
+
+    def __getitem__(self, idx):
+        return self.original[self.indices[idx]]
+
+
+def splitData(n: int, folds: int, shuffle: bool = True):
+    x = np.array([i for i in range(n)], dtype=np.int64)
+    if shuffle:
+        np.random.shuffle(x)
+    for i in range(folds):
+        i_first = int(i / folds * n)
+        i_next = int((i + 1) / folds * n)
+        x_rest = np.append(x[:i_first], x[i_next:], axis=0)
+        yield x_rest, x[i_first:i_next]
+
+
+def splitKFold(dataset: torch.utils.data.Dataset, folds: int, shuffle: bool = True):
+    n = len(dataset)
+    for train_idx, val_idx in splitData(n, folds, shuffle=shuffle):
+        yield FoldDataset(dataset, train_idx), FoldDataset(dataset, val_idx)
+
+
 if __name__ == "__main__":
     dataset = PhaseDataset("data/set_2/samples", "data/set_2/data.csv")
-    for i in range(len(dataset)):
-        image, poses = dataset[i]
-        print(i, image.shape, poses.shape)
+    for train, val in splitKFold(dataset, 4):
+        print(len(train), len(val))
