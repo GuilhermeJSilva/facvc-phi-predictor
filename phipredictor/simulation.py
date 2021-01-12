@@ -117,9 +117,9 @@ class PhaseSimulator:
         self._addSegments(sample, mirror_pose)
         if save_step is not None:
             vis.visualizeMatrix(sample, save_step)
+        sample = self._electricFieldPupil(sample)
         if not symmetry:
             self._removeSymmetry(sample)
-        sample = self._electricFieldPupil(sample)
         sample = self._electricFieldFocal(sample)
         sample = np.square(np.abs(sample))
         if noise:
