@@ -6,5 +6,6 @@ setup(
     install_requires=[
         "numpy",
         "torch",
-        "matplotlib"
+        "matplotlib",
+        "pandas"
     ])
