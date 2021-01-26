@@ -1,7 +1,16 @@
+import torch
 import torch.utils.data
 import pandas as pd
 import numpy as np
 import os
+
+
+def loadImage(path: str):
+    image = np.expand_dims(np.load(path), 0)
+    image = np.log(image, where=image > 1e-10)
+    image = np.nan_to_num(image)
+    image = torch.from_numpy(image).double()
+    return image
 
 
 class PhaseDataset(torch.utils.data.Dataset):
@@ -17,10 +26,7 @@ class PhaseDataset(torch.utils.data.Dataset):
             idx = idx.tolist()
 
         img_name = os.path.join(self.root_path, self.sample_frame["filename"][idx])
-        image = np.expand_dims(np.load(img_name), 0)
-        image = np.log(image, where=image > 1e-10)
-        image = np.nan_to_num(image)
-        image = torch.from_numpy(image).double()
+        image = loadImage(img_name)
         poses = self.sample_frame.iloc[idx, 2:]
         poses = torch.tensor([poses]).squeeze(axis=0).double()
 

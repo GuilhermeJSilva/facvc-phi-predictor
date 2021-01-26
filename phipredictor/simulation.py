@@ -130,12 +130,24 @@ class PhaseSimulator:
 
 
 if __name__ == "__main__":
-    # coef = np.array([[0, 0, 0, 0], [1, 0, -1, 0], [0, -1, 0, 1]]) / 10
-    coef = np.array([[0, 0, 0, 0], [0, 1, 0, -1], [1, 0, -1, 0]]) / 10
+    import os
+    import pandas as pd
+
+    coef = np.array([[0, 0, 0, 0], [1, 0, -1, 0], [0, -1, 0, 1]]) / 10
+    # coef = np.array([[0, 0, 0, 0], [0, 1, 0, -1], [1, 0, -1, 0]]) / 10
     simulator = PhaseSimulator()
-    sample = simulator.simulate(coef, False, True, "middle1.png")
-    vis.visualizeMatrix(sample, "end1.png")
-    sample2 = simulator.simulate(-coef, False, True, "middle2.png")
-    vis.visualizeMatrix(sample2, "end2.png")
-    print(np.max(sample))
-    print(np.max(sample2 - sample))
+
+    columns = ["filename"] + [
+        part + "_" + str(i) for i in range(1, 5) for part in ["piston", "tilt", "tip"]
+    ]
+    folder_path = "data/same_out"
+    os.makedirs(folder_path, exist_ok=True)
+    os.makedirs(folder_path + "/samples")
+    df = pd.DataFrame(columns=columns)
+    for i, poses in enumerate([coef, -coef]):
+        samples = simulator.simulate(poses, False, True)
+        filename = str(i) + ".npy"
+        np.save(folder_path + "/samples/" + filename, samples)
+        l_poses = [filename] + list(poses.flatten())
+        df.loc[len(df.index)] = l_poses
+    df.to_csv(folder_path + "/data.csv")
