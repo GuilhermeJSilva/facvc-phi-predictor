@@ -447,3 +447,6 @@ TSWLatexianTemp*
 
 # Ignore the data folder
 /data/
+
+# Extra latex file
+report/__latexindent_temp.tex
