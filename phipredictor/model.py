@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class Net(nn.Module):
@@ -14,10 +13,10 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(84, 12)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
+        x = self.pool(torch.tanh(self.conv1(x)))
+        x = self.pool(torch.tanh(self.conv2(x)))
         x = x.view(-1, 16 * 47 * 47)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = torch.tanh(self.fc1(x))
+        x = torch.tanh(self.fc2(x))
+        x = torch.tanh(self.fc3(x))
         return x

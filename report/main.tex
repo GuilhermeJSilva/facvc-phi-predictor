@@ -84,20 +84,39 @@ As it stands the training as the following qualities:
     of the values in the samples.
 \end{itemize}
 
+\section{Other Scripts}
+
+\verb|simulation.py| can be executed to generate a dataset with 
+custom coefficients. \verb|predict.py| can be used to run a model 
+in a particular example present in a dataset.
+
+\begin{itemize}
+    \item \textit{model} - Path to the file describing the model;
+    \item \textit{target} - Path to the root of the dataset;
+    \item \textit{index} - Index of the example to use.
+\end{itemize}
+
 \section{Results}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=2.8in]{images/results.png}
+\includegraphics[width=2.8in]{images/results_set_1_100.png}
 \caption{Training results with default values for learning rate and batch
 size while using a dataset without the removal of symmetry}
-\label{fig}
+\label{fig:symm}
 \end{figure}
 
-As it can be clearly seen in Figure \ref{fig} the model already converged after the 
-first epoch.
+\begin{figure}[!t]
+\centering
+\includegraphics[width=2.8in]{images/results_no_symm_100.png}
+\caption{Training results with default values for learning rate and batch
+size while using a dataset with the removal of symmetry}
+\label{fig:no-symm}
+\end{figure}
 
-\section{Problems}
+Figure \ref{fig:symm} shows the training results without the removal
+of symmetry and Figure \ref{fig:no-symm} shows the results of when
+the symmetry is removed.
 
 
 \end{document}

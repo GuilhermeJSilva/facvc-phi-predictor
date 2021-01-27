@@ -9,7 +9,7 @@ def graphTrainError(filename: str, out_file: str):
     plt.plot(
         "Steps",
         "Value",
-        data=df[(df["Validation"] == 1) & (df["Value"] < 1)],
+        data=df[(df["Validation"] == 1)],
         label="Validation Set",
     )
     plt.xlabel("Number of Training Steps")

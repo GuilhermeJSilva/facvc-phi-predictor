@@ -144,10 +144,11 @@ if __name__ == "__main__":
     os.makedirs(folder_path, exist_ok=True)
     os.makedirs(folder_path + "/samples")
     df = pd.DataFrame(columns=columns)
-    for i, poses in enumerate([coef, -coef]):
-        samples = simulator.simulate(poses, False, True)
-        filename = str(i) + ".npy"
-        np.save(folder_path + "/samples/" + filename, samples)
-        l_poses = [filename] + list(poses.flatten())
-        df.loc[len(df.index)] = l_poses
+    for j, sym in enumerate([True, False]):
+        for i, poses in enumerate([coef, -coef]):
+            samples = simulator.simulate(poses, False, sym)
+            filename = str(i + j) + ".npy"
+            np.save(folder_path + "/samples/" + filename, samples)
+            l_poses = [filename] + list(poses.flatten())
+            df.loc[len(df.index)] = l_poses
     df.to_csv(folder_path + "/data.csv")
